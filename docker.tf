@@ -41,17 +41,13 @@ resource "aws_security_group" "allow_all_docker" {
   }
 }
 
-# EC2 instance with public IP
+# EC2 instance with public IPv4 address
 resource "aws_instance" "docker" {
-  ami           = local.ami_id
-  instance_type = "t3.medium"
-
-  network_interface {
-    device_index                = 0
-    subnet_id                   = data.aws_subnets.default.ids[0]
-    security_groups             = [aws_security_group.allow_all_docker.id]
-    associate_public_ip_address = true
-  }
+  ami                         = local.ami_id
+  instance_type               = "t3.medium"
+  subnet_id                   = data.aws_subnets.default.ids[0]
+  vpc_security_group_ids      = [aws_security_group.allow_all_docker.id]
+  associate_public_ip_address = true
 
   root_block_device {
     volume_size = 50
@@ -65,8 +61,8 @@ resource "aws_instance" "docker" {
   }
 }
 
-# Optional: output the public IP
+# Optional: output the public IP of the instance
 output "docker_instance_public_ip" {
-  value = aws_instance.docker.public_ip
+  value       = aws_instance.docker.public_ip
   description = "Public IP of the Docker EC2 instance"
 }
