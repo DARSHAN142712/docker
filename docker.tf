@@ -1,45 +1,54 @@
+data "aws_vpc" "default" {
+  default = true
+}
+
+data "aws_subnet_ids" "default" {
+  vpc_id = data.aws_vpc.default.id
+}
+
 resource "aws_instance" "docker" {
-  ami           = local.ami_id
-  #instance_type = "t3.micro"
+  ami                    = local.ami_id
+  instance_type          = "t3.medium"
+  subnet_id              = data.aws_subnet_ids.default.ids[0]  
   vpc_security_group_ids = [aws_security_group.allow_all_docker.id]
-  instance_type = "t3.medium"
-  # need more for terraform
+
   root_block_device {
     volume_size = 50
-    volume_type = "gp3" # or "gp2", depending on your preference
+    volume_type = "gp3"
   }
+
   user_data = file("docker.sh")
-  #iam_instance_profile = "TerraformAdmin"
+
   tags = {
-     Name = "${var.project}-${var.environment}-docker"
+    Name = "${var.project}-${var.environment}-docker"
   }
 }
 
 resource "aws_security_group" "allow_all_docker" {
-    name        = "allow_all_docker"
-    description = "allow all traffic"
+  name        = "allow_all_docker"
+  description = "allow all traffic"
 
-    ingress {
-        from_port        = 0
-        to_port          = 0
-        protocol         = "-1"
-        cidr_blocks      = ["0.0.0.0/0"]
-        ipv6_cidr_blocks = ["::/0"]
-    }
-    egress {
-        from_port        = 0
-        to_port          = 0
-        protocol         = "-1"
-        cidr_blocks      = ["0.0.0.0/0"]
-        ipv6_cidr_blocks = ["::/0"]
-    }
+  ingress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
 
-    lifecycle {
-      create_before_destroy = true
-    }
+  egress {
+    from_port        = 0
+    to_port          = 0
+    protocol         = "-1"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
 
-    tags = {
-        Name = "allow-all-docker"
-    }
+  lifecycle {
+    create_before_destroy = true
+  }
+
+  tags = {
+    Name = "allow-all-docker"
+  }
 }
- 
