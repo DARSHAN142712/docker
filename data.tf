@@ -1,6 +1,5 @@
-
 data "aws_ami" "joindevops" {
-  owners           = ["973714476881"]
+  owners           = ["703686967073"]
   most_recent      = true
 
   filter {
@@ -17,5 +16,4 @@ data "aws_ami" "joindevops" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-}
- 
+}  
